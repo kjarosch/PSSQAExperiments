@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heather Briggs — Thumbtack Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;background:#f5f5f5;color:#111;}
+a{text-decoration:none;color:#0066cc;}
+a:hover{text-decoration:underline;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ── ADMIN ── */
+.adm-warn{background:#fff8e1;border-bottom:1px solid #ffe082;padding:9px 20px;text-align:center;font-size:12.5px;color:#5d4037;}
+.adm-warn strong{color:#b71c1c;}
+.adm-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px 14px 20px;background:#fff;border-bottom:1px solid #e0e0e0;}
+.adm-nav-left{display:flex;align-items:center;gap:6px;font-size:15px;}
+.adm-nav-left .brand{font-weight:700;color:#111;}
+.adm-nav-left .sep{color:#999;font-weight:300;margin:0 2px;}
+.adm-nav-left .section{color:#555;font-weight:400;}
+.adm-nav-right{font-size:13px;color:#333;display:flex;align-items:center;gap:6px;}
+.adm-nav-right .logout{color:#0066cc;font-size:13px;}
+.adm-body{max-width:1200px;margin:0 auto;padding:24px 24px;}
+.adm-section{background:#fff;border:1px solid #e0e0e0;border-radius:4px;margin-bottom:16px;overflow:hidden;}
+.adm-section-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e0e0e0;background:#fafafa;}
+.adm-section-header h2{font-size:14px;font-weight:600;color:#333;display:flex;align-items:center;gap:6px;}
+.adm-section-header .owner{font-size:12px;color:#999;font-weight:400;}
+.adm-profile-inner{padding:20px 16px;display:flex;align-items:flex-start;gap:20px;position:relative;}
+.adm-profile-logo{width:60px;height:60px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#999;flex-shrink:0;font-style:italic;}
+.adm-profile-info h1{font-size:22px;font-weight:700;color:#111;margin-bottom:10px;}
+.adm-pk-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.adm-pk-box{display:flex;align-items:center;gap:6px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:3px;padding:4px 8px;font-size:12px;}
+.adm-pk-box .lbl{color:#666;font-weight:600;margin-right:2px;}
+.adm-pk-box .val{color:#111;font-family:monospace;}
+.adm-pk-box .copy{color:#0066cc;cursor:pointer;font-size:11px;margin-left:4px;}
+.adm-badges{display:flex;gap:8px;}
+.adm-badge{padding:3px 10px;border-radius:3px;font-size:12px;font-weight:600;}
+.adm-badge.green{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;}
+.adm-badge.blue{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;}
+.adm-login-btn{position:absolute;top:20px;right:16px;display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #bdbdbd;border-radius:4px;padding:8px 16px;font-size:13px;color:#111;cursor:pointer;transition:background 0.15s;}
+.adm-login-btn:hover{background:#f5f5f5;border-color:#009FD9;color:#009FD9;}
+.adm-login-btn .ext{font-size:12px;color:#0066cc;}
+.adm-details-body{padding:0;}
+.adm-row{display:grid;grid-template-columns:260px 1fr;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.adm-row:last-child{border-bottom:none;}
+.adm-row-lbl{padding:10px 16px;color:#555;font-weight:500;background:#fafafa;border-right:1px solid #f0f0f0;}
+.adm-row-val{padding:10px 16px;color:#111;}
+.adm-row-val.link{color:#0066cc;}
+.adm-row-val .badge-sm{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:3px;font-size:12px;}
+.adm-row-val .badge-sm.green{background:#e8f5e9;color:#2e7d32;}
+.adm-row-val .badge-sm.gray{background:#f5f5f5;color:#666;border:1px solid #e0e0e0;}
+.pref-list{list-style:disc;padding-left:20px;font-size:13px;color:#333;}
+.pref-list li{margin-bottom:2px;}
+.unsub-btn{float:right;background:#fff;border:1px solid #bdbdbd;border-radius:3px;padding:4px 10px;font-size:12px;color:#333;cursor:pointer;}
+.adm-actions{background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:16px;}
+.adm-actions h3{font-size:13px;font-weight:700;color:#111;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.adm-actions h3 .icon{font-size:14px;}
+.adm-actions h4{font-size:12px;font-weight:700;color:#333;margin:14px 0 6px;text-transform:uppercase;letter-spacing:0.04em;}
+.adm-actions a{display:block;font-size:13px;color:#0066cc;margin-bottom:4px;}
+.adm-actions a.disabled{color:#bdbdbd;pointer-events:none;}
+.adm-two-col{display:grid;grid-template-columns:1fr 200px;gap:16px;align-items:start;}
+
+/* ── LOADING ── */
+#screen-loading.active{min-height:100vh;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#009FD9;border-radius:50%;animation:spin 0.75s linear infinite;}
+
+/* ── PRO APP SHARED ── */
+.imp-bar{background:#ffebee;border-bottom:1px solid #ffcdd2;padding:7px 20px;text-align:center;font-size:12.5px;color:#c62828;}
+.imp-bar a{color:#c62828;font-weight:600;}
+.search-warn{display:flex;align-items:center;gap:10px;background:#ffebee;border-bottom:1px solid #ffcdd2;padding:8px 20px;font-size:13px;color:#b71c1c;}
+.search-warn .warn-icon{width:20px;height:20px;background:#e53935;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0;}
+.search-warn a{color:#b71c1c;font-weight:700;text-decoration:underline;}
+.pro-topnav{background:#fff;border-bottom:1px solid #e0e0e0;padding:0 20px;display:flex;align-items:center;gap:0;}
+.pro-topnav-logo{width:34px;height:34px;background:#009FD9;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;margin-right:16px;flex-shrink:0;}
+.pro-topnav-item{padding:15px 14px;font-size:13.5px;color:#555;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;user-select:none;display:flex;align-items:center;gap:4px;}
+.pro-topnav-item:hover{color:#111;}
+.pro-topnav-item.active{color:#111;border-bottom-color:#009FD9;font-weight:600;}
+.nav-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.nav-dot.red{background:#e53935;}
+.nav-dot.blue{background:#009FD9;}
+.nav-badge{background:#009FD9;color:#fff;border-radius:10px;font-size:10px;font-weight:700;padding:1px 5px;margin-left:2px;}
+.pro-topnav-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
+.refer-btn{font-size:12.5px;color:#009FD9;border:1px solid #009FD9;border-radius:4px;padding:5px 12px;white-space:nowrap;}
+.bell-icon{font-size:18px;color:#555;cursor:pointer;}
+.account-chip{display:flex;align-items:center;gap:4px;font-size:13px;color:#333;cursor:pointer;}
+
+/* ── JOBS PAGE ── */
+.jobs-layout{display:flex;min-height:calc(100vh - 90px);}
+.jobs-sidebar{width:220px;padding:20px 16px;border-right:1px solid #e0e0e0;flex-shrink:0;}
+.jobs-sidebar-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:13.5px;color:#333;cursor:pointer;margin-bottom:2px;}
+.jobs-sidebar-item:hover{background:#f5f5f5;}
+.jobs-sidebar-item.active{background:#e3f2fd;color:#1565c0;font-weight:500;}
+.jobs-sidebar-item .si-icon{font-size:15px;width:18px;text-align:center;}
+.jobs-sidebar-divider{border:none;border-top:1px solid #e0e0e0;margin:12px 0;}
+.jobs-sidebar-hint{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;font-size:12px;color:#555;}
+.jobs-sidebar-hint .si-icon{font-size:14px;margin-top:1px;}
+.jobs-sidebar-hint a{color:#009FD9;}
+.jobs-main{flex:1;padding:28px 32px;}
+.jobs-main h2{font-size:20px;font-weight:700;color:#111;margin-bottom:16px;}
+.leads-empty{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:24px 20px;margin-bottom:24px;}
+.leads-empty p{font-size:14px;color:#555;margin-bottom:6px;}
+.leads-empty a{font-size:13.5px;color:#009FD9;display:inline-flex;align-items:center;gap:4px;}
+.section-title{font-size:16px;font-weight:700;color:#111;margin-bottom:14px;}
+.rec-card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;width:280px;position:relative;}
+.rec-card-label{display:flex;align-items:center;gap:6px;padding:8px 12px;font-size:12px;font-weight:700;color:#2e7d32;border-bottom:1px solid #e0e0e0;}
+.rec-card-img{height:130px;background:#e8eaf6;display:flex;align-items:center;justify-content:center;color:#9fa8da;font-size:13px;}
+.rec-card-body{padding:14px 12px;}
+.rec-card-body p{font-size:13px;color:#333;margin-bottom:12px;line-height:1.5;}
+.rec-card-body a{font-size:13.5px;color:#009FD9;display:block;text-align:center;}
+.rec-card-close{position:absolute;top:8px;right:10px;background:none;border:none;font-size:16px;color:#999;cursor:pointer;}
+.notif-popup{position:fixed;bottom:20px;left:20px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:14px;width:200px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.notif-popup .icon{font-size:24px;margin-bottom:6px;}
+.notif-popup p{font-size:12px;font-weight:600;color:#111;margin-bottom:2px;}
+.notif-popup span{font-size:11px;color:#555;}
+.notif-popup a{font-size:12px;color:#009FD9;display:block;margin-top:6px;}
+
+/* ── SELECT BUSINESS ── */
+.biz-select-page{max-width:600px;margin:0 auto;padding:40px 24px;}
+.biz-select-page h1{font-size:20px;font-weight:700;color:#111;margin-bottom:22px;}
+.biz-row{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:10px;cursor:pointer;transition:all 0.12s;}
+.biz-row:hover{border-color:#009FD9;background:#f0f9ff;}
+.biz-row span{font-size:14px;color:#111;}
+.biz-row .chevron{color:#bdbdbd;font-size:18px;}
+.biz-add{font-size:13px;color:#555;margin-top:10px;}
+.biz-add a{color:#009FD9;}
+
+/* ── PROFILE DASHBOARD ── */
+.prof-dash-page{max-width:640px;margin:0 auto;padding:24px;}
+.prof-card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:16px;}
+.prof-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
+.prof-biz-info{display:flex;align-items:flex-start;gap:14px;}
+.prof-biz-logo{width:48px;height:48px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.prof-biz-name{font-size:15px;font-weight:700;color:#111;margin-bottom:5px;}
+.prof-stars{display:flex;align-items:center;gap:2px;}
+.star{color:#f9a825;font-size:15px;}
+.star.empty{color:#e0e0e0;}
+.prof-reviews{font-size:13px;color:#555;margin-left:5px;}
+.prof-ask{font-size:13px;color:#009FD9;margin-left:8px;}
+.prof-edit{font-size:13px;color:#009FD9;cursor:pointer;font-weight:500;}
+.prof-action-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.prof-action-btn{border:1px solid #bdbdbd;border-radius:6px;padding:11px 8px;text-align:center;font-size:13px;color:#111;cursor:pointer;background:#fff;transition:all 0.12s;}
+.prof-action-btn:hover{background:#f5f5f5;}
+.prof-action-btn.outlined{border-color:#009FD9;color:#009FD9;}
+.prof-action-btn.outlined:hover{background:#f0f9ff;}
+/* top pro */
+.top-pro-track{display:flex;align-items:center;margin:14px 0 8px;}
+.tp-node{width:38px;height:38px;border-radius:50%;background:#f5f5f5;border:2px solid #e0e0e0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px;}
+.tp-node.start{background:#fff;border:2px solid #bdbdbd;}
+.tp-line{flex:1;height:4px;background:#e0e0e0;border-radius:2px;}
+.tp-line.filled{background:#009FD9;}
+/* detail rows */
+.prof-detail-row{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid #f5f5f5;font-size:13.5px;}
+.prof-detail-row:last-child{border-bottom:none;}
+.prof-detail-icon{width:18px;text-align:center;flex-shrink:0;color:#555;margin-top:1px;}
+.prof-detail-label{color:#555;width:120px;flex-shrink:0;}
+.prof-detail-val{color:#111;}
+
+/* ── CUSTOMER PROFILE ── */
+#screen-customer-profile{background:#fff;}
+.cv-topnav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 24px;display:flex;align-items:center;height:56px;gap:0;}
+.cv-topnav-cat{font-size:15px;font-weight:600;color:#111;margin-right:12px;}
+.cv-loc-wrap{display:flex;align-items:center;border:1px solid #d4d4d4;border-radius:24px;padding:6px 14px;gap:6px;font-size:13px;color:#444;cursor:pointer;}
+.cv-loc-wrap svg{color:#009FD9;}
+.cv-search-icon-btn{width:36px;height:36px;background:#009FD9;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:6px;}
+.cv-topnav-right{margin-left:auto;display:flex;align-items:center;gap:20px;}
+.cv-topnav-link{font-size:13.5px;color:#222;cursor:pointer;position:relative;}
+.cv-topnav-link .reddot{width:7px;height:7px;background:#e53935;border-radius:50%;position:absolute;top:-2px;right:-5px;}
+.cv-avatar-circle{width:32px;height:32px;background:#009FD9;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;}
+.cv-edit-bar{background:#f7f7f7;border-bottom:1px solid #e8e8e8;padding:9px 24px;display:flex;align-items:center;gap:6px;font-size:13px;color:#009FD9;cursor:pointer;}
+.cv-customer-banner{background:#444;color:#fff;text-align:center;padding:7px 16px;font-size:12.5px;letter-spacing:0.02em;}
+.cv-breadcrumb{padding:12px 24px 0;font-size:13px;color:#888;display:flex;align-items:center;gap:5px;}
+.cv-breadcrumb a{color:#009FD9;}
+.cv-breadcrumb svg{color:#bbb;}
+.cv-body{display:flex;padding:16px 24px 80px;gap:32px;max-width:1080px;margin:0 auto;}
+.cv-main{flex:1;min-width:0;padding-right:8px;}
+.cv-side{width:270px;flex-shrink:0;}
+.cv-side-sticky{position:sticky;top:16px;}
+/* sidebar card */
+.cv-scard{border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;}
+.cv-scard-top{padding:16px 16px 0;}
+.cv-scard-msg-icon{margin-bottom:4px;}
+.cv-scard-price-lbl{font-size:13px;color:#555;margin-bottom:2px;}
+.cv-scard-price-link{font-size:13px;color:#009FD9;display:block;margin-bottom:14px;}
+.cv-scard-field{margin-bottom:10px;padding:0 16px;}
+.cv-scard-field label{font-size:12.5px;color:#222;font-weight:500;display:block;margin-bottom:4px;}
+.cv-scard-field input,.cv-scard-field select{width:100%;border:1.5px solid #d4d4d4;border-radius:6px;padding:9px 11px;font-size:13.5px;color:#222;background:#fff;outline:none;}
+.cv-scard-field input:focus,.cv-scard-field select:focus{border-color:#009FD9;}
+.cv-scard-sorry{padding:10px 16px 16px;font-size:12.5px;color:#888;line-height:1.55;}
+.cv-scard-sorry a{color:#009FD9;}
+/* pro header */
+.cv-pro-logo{width:80px;height:80px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:14px;border:1px solid #e8e8e8;}
+.cv-pro-name{font-size:26px;font-weight:800;color:#111;margin-bottom:8px;line-height:1.2;}
+.cv-rating-inline{display:flex;align-items:center;gap:4px;margin-bottom:14px;}
+.cv-star{color:#f9a825;font-size:17px;line-height:1;}
+.cv-rating-num{font-size:15px;font-weight:700;color:#111;margin-left:3px;}
+.cv-rating-count{font-size:14px;color:#555;}
+.cv-share-btn{display:inline-flex;align-items:center;gap:7px;border:1.5px solid #d4d4d4;border-radius:24px;padding:8px 20px;font-size:14px;color:#222;cursor:pointer;margin-bottom:22px;background:#fff;}
+/* subnav */
+.cv-subnav{display:flex;border-bottom:1.5px solid #e8e8e8;margin-bottom:0;gap:0;}
+.cv-snav-item{padding:12px 14px;font-size:14px;color:#666;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1.5px;white-space:nowrap;}
+.cv-snav-item:hover{color:#111;}
+.cv-snav-item.active{color:#111;border-bottom-color:#111;font-weight:600;}
+/* section dividers */
+.cv-divider{border:none;border-top:1.5px solid #e8e8e8;margin:24px 0;}
+.cv-sec-title{font-size:17px;font-weight:700;color:#111;margin-bottom:12px;}
+.cv-about-text{font-size:14.5px;color:#333;line-height:1.72;margin-bottom:0;}
+/* overview + hours grid */
+.cv-ov-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;}
+.cv-ov-col h4{font-size:14.5px;font-weight:700;color:#111;margin-bottom:12px;}
+.cv-ov-row{display:flex;align-items:center;gap:9px;font-size:14px;color:#333;margin-bottom:9px;}
+.cv-ov-icon{display:flex;align-items:center;justify-content:center;width:20px;color:#009FD9;flex-shrink:0;}
+.hours-row{display:flex;justify-content:space-between;font-size:14px;color:#333;padding:3px 0;}
+.hours-ns{font-size:13.5px;color:#aaa;font-style:italic;}
+/* payment */
+.cv-pay-title{font-size:14.5px;font-weight:700;color:#111;margin-bottom:4px;}
+.cv-pay-text{font-size:14px;color:#333;}
+/* CTA buttons */
+.cv-cta-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px;margin-bottom:0;}
+.cv-cta-btn{border:1.5px solid #009FD9;border-radius:8px;padding:13px 10px;text-align:center;font-size:14.5px;color:#009FD9;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;font-weight:500;}
+.cv-cta-btn:hover{background:#f0f9ff;}
+/* no photos */
+.cv-nophoto{background:#f8f8f8;border-radius:8px;padding:44px 20px;text-align:center;}
+.cv-nophoto-title{font-size:15px;font-weight:600;color:#888;margin-bottom:4px;}
+.cv-nophoto-sub{font-size:13.5px;color:#bbb;}
+/* reviews */
+.cv-reviews-summary{display:flex;align-items:flex-start;gap:28px;margin-bottom:16px;}
+.cv-rev-big-num{font-size:42px;font-weight:800;color:#111;line-height:1;}
+.cv-rev-big-stars{display:flex;gap:2px;margin:6px 0 4px;}
+.cv-rev-count{font-size:13.5px;color:#555;}
+.cv-rev-bars{flex:1;}
+.cv-rev-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:13px;color:#555;}
+.cv-rev-bar-row .bar-label{width:10px;text-align:right;flex-shrink:0;}
+.cv-rev-bar-row .bar-star{color:#f9a825;font-size:12px;flex-shrink:0;}
+.cv-rev-bar-track{flex:1;height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden;}
+.cv-rev-bar-fill{height:100%;background:#009FD9;border-radius:4px;}
+.cv-rev-bar-pct{width:32px;text-align:right;flex-shrink:0;}
+.cv-rev-trust{font-size:13px;color:#555;margin-bottom:12px;}
+.cv-rev-trust a{color:#009FD9;}
+.cv-rev-search{display:flex;align-items:center;border:1.5px solid #d4d4d4;border-radius:6px;padding:8px 12px;gap:8px;margin-bottom:20px;}
+.cv-rev-search input{border:none;outline:none;font-size:14px;color:#333;flex:1;background:transparent;}
+.review-item{padding:20px 0;border-bottom:1.5px solid #f0f0f0;}
+.review-item:last-child{border-bottom:none;}
+.review-top-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.review-left{display:flex;align-items:center;gap:10px;}
+.review-av{width:40px;height:40px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#555;flex-shrink:0;}
+.review-name{font-size:14px;font-weight:700;color:#111;}
+.review-date{font-size:12.5px;color:#aaa;white-space:nowrap;}
+.review-stars-sm{display:flex;gap:2px;}
+.review-body{font-size:14px;color:#333;line-height:1.65;}
+/* credentials */
+.cred-title-row{display:flex;align-items:center;gap:6px;}
+.cred-info-icon{width:16px;height:16px;border-radius:50%;border:1.5px solid #aaa;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;cursor:pointer;}
+.cred-bgc-row{font-size:14px;color:#111;display:flex;align-items:center;gap:6px;margin-top:10px;}
+.cred-bgc-name{font-size:13.5px;color:#555;margin-top:2px;}
+.cred-link{font-size:14px;color:#009FD9;display:block;margin-top:8px;}
+/* faq */
+.faq-item{padding:18px 0;border-bottom:1.5px solid #f0f0f0;}
+.faq-item:last-child{border-bottom:none;}
+.faq-q{font-size:14.5px;font-weight:700;color:#111;margin-bottom:7px;}
+.faq-a{font-size:14px;color:#bbb;font-style:italic;}
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: ADMIN -->
+<div id="screen-admin" class="screen active">
+  <div class="adm-warn">⚠️ <strong>WARNING: This is production admin. All access is logged and audited. Be careful!</strong><br>By continuing your use of Thumbtack admin, you confirm that you are accessing the requested data for proper Thumbtack purposes only. For more information, review the <a href="#">Data Access Policy</a>.</div>
+  <div class="adm-nav">
+    <div class="adm-nav-left">
+      <span class="brand">Thumbtack</span>
+      <span style="color:#bbb;font-size:13px;">Admin</span>
+      <span class="sep">/</span>
+      <span class="section">Users</span>
+    </div>
+    <div class="adm-nav-right">
+      Kendl Jarosch (kjarosch) <span class="logout">↗</span>
+    </div>
+  </div>
+  <div class="adm-body">
+    <div class="adm-two-col">
+      <div style="flex:1;">
+        <div class="adm-section">
+          <div class="adm-section-header">
+            <h2>Profile ∧</h2>
+            <span class="owner">Owner: admin_platform</span>
+          </div>
+          <div class="adm-profile-inner">
+            <div class="adm-profile-logo">No logo</div>
+            <div class="adm-profile-info">
+              <h1>Heather Briggs</h1>
+              <div class="adm-pk-row">
+                <div class="adm-pk-box"><span class="lbl">PK</span><span class="val">39201847650293847</span><span class="copy">⧉</span></div>
+                <div class="adm-pk-box"><span class="lbl">ID [DEPRECATED]</span><span class="val">88421033</span><span class="copy">⧉</span></div>
+              </div>
+              <div class="adm-badges">
+                <span class="adm-badge green">Enabled</span>
+                <span class="adm-badge blue">Both Pro &amp; Customer</span>
+              </div>
+            </div>
+            <button class="adm-login-btn" onclick="startLogin()">Log in as user <span class="ext">↗</span></button>
+          </div>
+        </div>
+        <div class="adm-section">
+          <div class="adm-section-header">
+            <h2>Details ∧</h2>
+            <span class="owner">Owner: admin_platform</span>
+          </div>
+          <div class="adm-details-body">
+            <div class="adm-row"><div class="adm-row-lbl">Email</div><div class="adm-row-val">heather.briggs.junk@gmail.com</div></div>
+            <div class="adm-row"><div class="adm-row-lbl">Privileges</div><div class="adm-row-val link">Modify ↗</div></div>
+            <div class="adm-row"><div class="adm-row-lbl">Proofreading Portal Permissions</div><div class="adm-row-val link">Modify ↗</div></div>
+            <div class="adm-row"><div class="adm-row-lbl">Time zone</div><div class="adm-row-val">Pacific Time Zone (currently Thursday, 12:20 PM)</div></div>
+            <div class="adm-row"><div class="adm-row-lbl">Signed up</div><div class="adm-row-val">5 days ago · Jun 1, 2026, 9:14 AM</div></div>
+            <div class="adm-row"><div class="adm-row-lbl">Signup platform</div><div class="adm-row-val">iOS App</div></div>
+            <div class="adm-row"><div class="adm-row-lbl">Signup source</div><div class="adm-row-val"></div></div>
+            <div class="adm-row">
+              <div class="adm-row-lbl">Contact preferences</div>
+              <div class="adm-row-val">
+                <button class="unsub-btn">Unsubscribe All</button>
+                <ul class="pref-list">
+                  <li>Pro tips</li><li>Customer offers</li><li>Pro announcements</li><li>Pro feedback</li><li>Pro referrals</li><li>Customer reminders</li><li>Customer feedback</li><li>Customer (other)</li><li>Pro market report</li><li>Pro email new lead roundup</li><li>Pro email newsletters</li>
+                </ul>
+              </div>
+            </div>
+            <div class="adm-row"><div class="adm-row-lbl">Identity status</div><div class="adm-row-val"><span class="badge-sm green">Identity Verified</span> &nbsp;<span style="color:#0066cc;font-size:12px;">Update ↗</span></div></div>
+            <div class="adm-row"><div class="adm-row-lbl">Pro Account hold flags</div><div class="adm-row-val"><span class="badge-sm gray">No flags applied</span></div></div>
+            <div class="adm-row"><div class="adm-row-lbl">Managed Account Status</div><div class="adm-row-val">Not managed</div></div>
+            <div class="adm-row"><div class="adm-row-lbl">Customer Account hold flags</div><div class="adm-row-val"><span class="badge-sm gray">No holds applied</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="adm-actions">
+          <h3><span class="icon">👤</span> Basic</h3>
+          <a href="#">Create New User</a><a href="#">Edit User</a><a href="#">Add Service</a><a href="#">Reset password</a>
+          <h4>Account Status</h4>
+          <a href="#">Admin Delete</a><a href="#">Admin Ghost</a><a href="#" class="disabled">Admin Undelete</a><a href="#" class="disabled">Admin Unghost</a>
+          <a href="#">Add Pro Account Hold</a><a href="#" class="disabled">Remove Pro Account Hold</a><a href="#" class="disabled">Remove Past-Due Balance Hold</a>
+          <a href="#">Add Customer Account Hold</a><a href="#" class="disabled">Remove Customer Account Hold</a>
+          <a href="#">Deletion and Ghost Logs</a><a href="#">Pro Account Hold Logs</a><a href="#">Customer Account Hold Logs</a>
+          <h4>💳 Payments</h4>
+          <a href="#">Payout Gateway Account Details</a><a href="#">Pro-Payment Summary</a><a href="#">Promotional Credits</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: LOADING -->
+<div id="screen-loading" class="screen">
+  <div class="spinner"></div>
+  <p style="font-size:14px;color:#777;">Opening Heather's account...</p>
+</div>
+
+<!-- SCREEN 3: JOBS -->
+<div id="screen-jobs" class="screen">
+  <div class="imp-bar">Impersonating Heather Briggs (<a href="#">39201847650293847</a>)</div>
+  <div class="search-warn"><div class="warn-icon">!</div><span>You're not showing up in search results. <a href="#">Set targeting preferences</a></span></div>
+  <div class="pro-topnav">
+    <div class="pro-topnav-logo">H</div>
+    <div class="pro-topnav-item active">Jobs</div>
+    <div class="pro-topnav-item">Messages <span class="nav-badge">2</span></div>
+    <div class="pro-topnav-item">Performance</div>
+    <div class="pro-topnav-item">Services &nbsp;<span class="nav-dot red"></span></div>
+    <div class="pro-topnav-item">Calendar</div>
+    <div class="pro-topnav-item" onclick="goTo('screen-select-biz')">Profile</div>
+    <div class="pro-topnav-item">Apps &nbsp;<span class="nav-dot blue"></span></div>
+    <div class="pro-topnav-right">
+      <span class="refer-btn">Refer pros. Get up to $100.</span>
+      <span class="bell-icon">🔔</span>
+      <span class="account-chip">Heather ▾</span>
+    </div>
+  </div>
+  <div class="jobs-layout">
+    <div class="jobs-sidebar">
+      <div class="jobs-sidebar-item active"><span class="si-icon">📋</span> For you</div>
+      <div class="jobs-sidebar-item"><span class="si-icon">🔗</span> Opportunities</div>
+      <hr class="jobs-sidebar-divider">
+      <div class="jobs-sidebar-hint"><span class="si-icon">📅</span><span>Review your availability and <a href="#">update your work hours.</a></span></div>
+    </div>
+    <div class="jobs-main">
+      <h2>Leads</h2>
+      <div class="leads-empty">
+        <p>After customers pick you, those leads show up here.</p>
+        <a href="#">See your current performance →</a>
+      </div>
+      <p class="section-title">Top recommendations for your business:</p>
+      <div class="rec-card">
+        <div class="rec-card-label">↑ GROW <button class="rec-card-close">✕</button></div>
+        <div class="rec-card-img">[ Category image ]</div>
+        <div class="rec-card-body">
+          <p>There were 847 local jobs in Junk Removal this month in your area.</p>
+          <a href="#">Review this service</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="notif-popup">
+    <div class="icon">⚡</div>
+    <p>Never miss a lead.</p>
+    <span>Or a message. We'll let you know the second it happens.</span>
+    <a href="#">Turn on desktop notifications</a>
+  </div>
+</div>
+
+<!-- SCREEN 4: SELECT BUSINESS -->
+<div id="screen-select-biz" class="screen">
+  <div class="imp-bar">Impersonating Heather Briggs (<a href="#">39201847650293847</a>)</div>
+  <div class="pro-topnav">
+    <div class="pro-topnav-logo">H</div>
+    <div class="pro-topnav-item">Jobs</div>
+    <div class="pro-topnav-item">Messages <span class="nav-badge">2</span></div>
+    <div class="pro-topnav-item">Performance</div>
+    <div class="pro-topnav-item">Services &nbsp;<span class="nav-dot red"></span></div>
+    <div class="pro-topnav-item">Calendar</div>
+    <div class="pro-topnav-item active">Profile</div>
+    <div class="pro-topnav-item">Apps &nbsp;<span class="nav-dot blue"></span></div>
+    <div class="pro-topnav-right">
+      <span class="refer-btn">Refer pros. Get up to $100.</span>
+      <span class="bell-icon">🔔</span>
+      <span class="account-chip">Heather ▾</span>
+    </div>
+  </div>
+  <div class="biz-select-page">
+    <h1>Select a business</h1>
+    <div class="biz-row" onclick="goTo('screen-profile-dash')">
+      <span>Heather's Junk Removal | San Diego</span>
+      <span class="chevron">›</span>
+    </div>
+    <div class="biz-row">
+      <span>Heather's Junk Removal | Riverside</span>
+      <span class="chevron">›</span>
+    </div>
+    <p class="biz-add">Have another business in mind? <a href="#">Add new business</a></p>
+  </div>
+</div>
+
+<!-- SCREEN 5: PROFILE DASHBOARD -->
+<div id="screen-profile-dash" class="screen">
+  <div class="imp-bar">Impersonating Heather Briggs (<a href="#">39201847650293847</a>) &nbsp;·&nbsp; <a href="#" style="color:#c62828;">You're not showing up in search results.</a> <a href="#">Set targeting preferences</a></div>
+  <div class="pro-topnav">
+    <div class="pro-topnav-logo">H</div>
+    <div class="pro-topnav-item">Jobs</div>
+    <div class="pro-topnav-item">Messages <span class="nav-badge">2</span></div>
+    <div class="pro-topnav-item">Performance</div>
+    <div class="pro-topnav-item">Services &nbsp;<span class="nav-dot red"></span></div>
+    <div class="pro-topnav-item">Calendar</div>
+    <div class="pro-topnav-item active">Profile</div>
+    <div class="pro-topnav-item">Apps &nbsp;<span class="nav-dot blue"></span></div>
+    <div class="pro-topnav-right">
+      <span class="refer-btn">Refer pros. Get up to $100.</span>
+      <span class="bell-icon">🔔</span>
+      <span class="account-chip">Heather ▾</span>
+    </div>
+  </div>
+  <div class="prof-dash-page">
+    <div class="prof-card">
+      <div class="prof-card-header">
+        <div class="prof-biz-info">
+          <div class="prof-biz-logo">🗑️</div>
+          <div>
+            <div class="prof-biz-name">Heather's Junk Removal | San Diego</div>
+            <div class="prof-stars">
+              <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              <span class="prof-reviews">1 review</span>
+              <a class="prof-ask" href="#">Ask for Reviews</a>
+            </div>
+          </div>
+        </div>
+        <span class="prof-edit">Edit</span>
+      </div>
+      <div class="prof-action-btns">
+        <div class="prof-action-btn">See how you rank</div>
+        <div class="prof-action-btn outlined" onclick="goTo('screen-customer-profile')">View your profile as customer</div>
+      </div>
+    </div>
+    <div class="prof-card">
+      <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:4px;">Your path to Top Pro</div>
+      <div class="top-pro-track">
+        <div class="tp-node start" style="border-color:#009FD9;background:#fff;">⭐</div>
+        <div class="tp-line filled"></div>
+        <div class="tp-node">⚙️</div>
+        <div class="tp-line"></div>
+        <div class="tp-node">🌟</div>
+        <div class="tp-line"></div>
+        <div class="tp-node">🏆</div>
+      </div>
+      <p style="font-size:13px;color:#555;">Just getting started. <a href="#" style="color:#009FD9;">View details.</a></p>
+    </div>
+    <div class="prof-card">
+      <div class="prof-detail-row"><span class="prof-detail-icon">📞</span><span class="prof-detail-label">Phone</span><span class="prof-detail-val">(619) 555-0184</span></div>
+      <div class="prof-detail-row"><span class="prof-detail-icon">🌐</span><span class="prof-detail-label">Website</span><span class="prof-detail-val" style="color:#999;font-style:italic;">Not listed</span></div>
+      <div class="prof-detail-row"><span class="prof-detail-icon">📍</span><span class="prof-detail-label">Address</span><span class="prof-detail-val">San Diego, CA 92101</span></div>
+      <div class="prof-detail-row"><span class="prof-detail-icon">📅</span><span class="prof-detail-label">Year founded</span><span class="prof-detail-val">2025</span></div>
+      <div class="prof-detail-row"><span class="prof-detail-icon">👤</span><span class="prof-detail-label">Employees</span><span class="prof-detail-val">1</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 6: CUSTOMER PROFILE -->
+<div id="screen-customer-profile" class="screen">
+  <!-- top nav -->
+  <div class="cv-topnav">
+    <span class="cv-topnav-cat">Junk Removal</span>
+    <div class="cv-loc-wrap">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#009FD9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      San Diego, CA
+    </div>
+    <button class="cv-search-icon-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <div class="cv-topnav-right">
+      <span class="cv-topnav-link">Projects <span class="reddot"></span></span>
+      <span class="cv-topnav-link">Team</span>
+      <span class="cv-topnav-link">Inbox</span>
+      <div class="cv-avatar-circle">K</div>
+    </div>
+  </div>
+  <div class="cv-edit-bar">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#009FD9" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Edit Profile
+  </div>
+  <div class="cv-customer-banner">Customer view</div>
+  <div class="cv-breadcrumb">
+    <a href="#">Thumbtack</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    <a href="#">Junk Removal</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    <span>Heather's Junk Removal</span>
+  </div>
+
+  <div class="cv-body">
+    <!-- MAIN COLUMN -->
+    <div class="cv-main">
+      <div class="cv-pro-logo">🗑️</div>
+      <div class="cv-pro-name">Heather's Junk Removal</div>
+      <div class="cv-rating-inline">
+        <span class="cv-star">★</span><span class="cv-star">★</span><span class="cv-star">★</span><span class="cv-star">★</span><span class="cv-star">★</span>
+        <span class="cv-rating-num">5.0</span>
+        <span class="cv-rating-count">(1)</span>
+      </div>
+      <button class="cv-share-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        Share
+      </button>
+
+      <!-- subnav -->
+      <div class="cv-subnav">
+        <div class="cv-snav-item active">About</div>
+        <div class="cv-snav-item">Services</div>
+        <div class="cv-snav-item">Photos</div>
+        <div class="cv-snav-item">Reviews</div>
+        <div class="cv-snav-item">Credentials</div>
+        <div class="cv-snav-item">FAQs</div>
+      </div>
+
+      <hr class="cv-divider">
+
+      <!-- About -->
+      <div class="cv-sec-title">About</div>
+      <div class="cv-about-text">We haul junk. Fast and affordable. Call us today for a free estimate. We serve the greater San Diego area and can usually get to you the same day.</div>
+
+      <!-- Overview + Hours -->
+      <div class="cv-ov-grid">
+        <div>
+          <h4>Overview</h4>
+          <div class="cv-ov-row">
+            <span class="cv-ov-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#009FD9" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            Background checked
+          </div>
+          <div class="cv-ov-row">
+            <span class="cv-ov-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#009FD9" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+            1 employee
+          </div>
+          <div class="cv-ov-row">
+            <span class="cv-ov-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#009FD9" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            1 year in business
+          </div>
+        </div>
+        <div>
+          <h4>Business hours</h4>
+          <div class="hours-ns">Not set yet</div>
+        </div>
+      </div>
+
+      <hr class="cv-divider">
+
+      <!-- Payment -->
+      <div class="cv-pay-title">Payment methods</div>
+      <div class="cv-pay-text">This pro accepts payments via Cash and Venmo.</div>
+
+      <!-- CTA -->
+      <div class="cv-cta-row">
+        <div class="cv-cta-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#009FD9" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Message
+        </div>
+        <div class="cv-cta-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#009FD9" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.66-.66a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          Request a call
+        </div>
+      </div>
+
+      <hr class="cv-divider">
+
+      <!-- Projects and media -->
+      <div class="cv-sec-title">Projects and media</div>
+      <div class="cv-nophoto">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:10px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div class="cv-nophoto-title">No photos yet</div>
+        <div class="cv-nophoto-sub">This pro hasn't added any photos of their work.</div>
+      </div>
+
+      <hr class="cv-divider">
+
+      <!-- Reviews -->
+      <div class="cv-sec-title">Reviews</div>
+      <p style="font-size:14px;color:#555;margin-bottom:14px;">Customers rated this pro highly for <strong>value</strong>, <strong>punctuality</strong>, and <strong>work quality</strong>.</p>
+      <div class="cv-reviews-summary">
+        <div>
+          <div class="cv-rev-big-num">5.0</div>
+          <div class="cv-rev-big-stars"><span class="cv-star">★</span><span class="cv-star">★</span><span class="cv-star">★</span><span class="cv-star">★</span><span class="cv-star">★</span></div>
+          <div class="cv-rev-count">1 review</div>
+        </div>
+        <div class="cv-rev-bars">
+          <div class="cv-rev-bar-row"><span class="bar-label">5</span><span class="bar-star">★</span><div class="cv-rev-bar-track"><div class="cv-rev-bar-fill" style="width:100%"></div></div><span class="cv-rev-bar-pct">100%</span></div>
+          <div class="cv-rev-bar-row"><span class="bar-label">4</span><span class="bar-star">★</span><div class="cv-rev-bar-track"><div class="cv-rev-bar-fill" style="width:0%"></div></div><span class="cv-rev-bar-pct">0%</span></div>
+          <div class="cv-rev-bar-row"><span class="bar-label">3</span><span class="bar-star">★</span><div class="cv-rev-bar-track"><div class="cv-rev-bar-fill" style="width:0%"></div></div><span class="cv-rev-bar-pct">0%</span></div>
+          <div class="cv-rev-bar-row"><span class="bar-label">2</span><span class="bar-star">★</span><div class="cv-rev-bar-track"><div class="cv-rev-bar-fill" style="width:0%"></div></div><span class="cv-rev-bar-pct">0%</span></div>
+          <div class="cv-rev-bar-row"><span class="bar-label">1</span><span class="bar-star">★</span><div class="cv-rev-bar-track"><div class="cv-rev-bar-fill" style="width:0%"></div></div><span class="cv-rev-bar-pct">0%</span></div>
+        </div>
+      </div>
+      <p class="cv-rev-trust">Your trust means everything to us. <a href="#">Learn about our review guidelines.</a></p>
+      <div class="cv-rev-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search reviews">
+      </div>
+      <div class="review-item">
+        <div class="review-top-row">
+          <div class="review-left">
+            <div class="review-av" style="background:#bbdefb;color:#1565c0;">JR</div>
+            <div>
+              <div class="review-name">Jamie R.</div>
+            </div>
+          </div>
+          <div class="review-date">2 weeks ago</div>
+        </div>
+        <div class="review-stars-sm" style="margin-bottom:8px;">
+          <span class="cv-star" style="font-size:14px;">★</span><span class="cv-star" style="font-size:14px;">★</span><span class="cv-star" style="font-size:14px;">★</span><span class="cv-star" style="font-size:14px;">★</span><span class="cv-star" style="font-size:14px;">★</span>
+        </div>
+        <div class="review-body">Heather showed up on time and cleared out my garage in under 2 hours. Straightforward, no surprises on price. Would use again.</div>
+      </div>
+
+      <hr class="cv-divider">
+
+      <!-- Credentials -->
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;">
+        <div class="cv-sec-title" style="margin:0;">Credentials</div>
+        <div class="cred-info-icon">i</div>
+      </div>
+      <div class="cred-bgc-row">
+        Background Check
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="cred-bgc-name">Heather Briggs</div>
+      <a href="#" class="cred-link">View credential details</a>
+
+      <hr class="cv-divider">
+
+      <!-- FAQs -->
+      <div class="cv-sec-title">FAQs</div>
+      <div class="faq-item"><div class="faq-q">What should the customer know about your pricing (e.g., discounts, fees)?</div><div class="faq-a">No answer provided yet.</div></div>
+      <div class="faq-item"><div class="faq-q">What is your typical process for working with a new customer?</div><div class="faq-a">No answer provided yet.</div></div>
+      <div class="faq-item"><div class="faq-q">What education and/or training do you have that relates to your work?</div><div class="faq-a">No answer provided yet.</div></div>
+      <div class="faq-item"><div class="faq-q">What types of customers have you worked with?</div><div class="faq-a">No answer provided yet.</div></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="cv-side">
+      <div class="cv-side-sticky">
+        <div class="cv-scard">
+          <div class="cv-scard-top">
+            <div class="cv-scard-msg-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#009FD9" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <div class="cv-scard-price-lbl">Contact for price</div>
+            <a href="#" class="cv-scard-price-link">View details</a>
+          </div>
+          <div class="cv-scard-field">
+            <label>Zip code</label>
+            <input type="text" value="92101">
+          </div>
+          <div class="cv-scard-field">
+            <label>Type of junk</label>
+            <select><option>Select answer</option><option>Household items</option><option>Appliances</option><option>Furniture</option><option>Yard waste</option><option>Mixed / other</option></select>
+          </div>
+          <div class="cv-scard-field">
+            <label>Amount of junk</label>
+            <select><option>Select answer</option><option>A few items</option><option>Half a truck load</option><option>Full truck load</option></select>
+          </div>
+          <div style="padding:0 16px 16px;">
+            <button style="width:100%;background:#009FD9;color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px;">Get a quote</button>
+          </div>
+          <div class="cv-scard-sorry">Sorry this pro can't do your job, but we know other pros who can. <a href="#">Check them out</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function startLogin(){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('screen-loading').classList.add('active');
+  window.scrollTo(0,0);
+  setTimeout(function(){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+    document.getElementById('screen-jobs').classList.add('active');
+    window.scrollTo(0,0);
+  },1600);
+}
+document.querySelectorAll('.pro-topnav-item').forEach(function(el){
+  el.addEventListener('click',function(){
+    if(el.textContent.trim().startsWith('Profile')){goTo('screen-select-biz');}
+  });
+});
+</script>
+</body>
+</html>
